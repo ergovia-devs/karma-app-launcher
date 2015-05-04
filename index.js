@@ -74,7 +74,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
         self.log.debug("Starting at " + url);
 
         var appDirs = self.settings.appDirs;
-        var hostIP = self.settings.hostIP;
+        var host = self.settings.host;
 
         appDirs.forEach(function(appDir) {
 
@@ -85,7 +85,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                 }
 
                 var newUrl = url + "?id=" + id;
-                newUrl = newUrl.replace('localhost', hostIP);
+                newUrl = newUrl.replace('localhost', host);
                 var toWrite = read_data.toString().replace(self.defaultUrl, newUrl);
 
                 console.log("neue config:");
