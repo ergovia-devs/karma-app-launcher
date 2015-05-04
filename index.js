@@ -60,7 +60,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                 }
 
                 var newUrl = url + "?id=" + id;
-                var toWrite = read_data.toString().replace(/self.defaultUrl/g, newUrl);
+                var toWrite = read_data.toString().replace(self.defaultUrl, newUrl);
 
                 console.log("neue config:");
                 console.log(toWrite);
@@ -91,7 +91,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                                 return;
                             }
 
-                            var toWrite = read_data.toString().replace(/newUrl/g, self.defaultUrl);
+                            var toWrite = read_data.toString().replace(newUrl, self.defaultUrl);
                             fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
                                 if (write_err) {
                                     errorHandler(write_err);
