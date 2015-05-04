@@ -46,6 +46,30 @@ var CordovaApp = function(id, emitter, args, logger, config) {
         emitter.emit('browser_process_failure', self);
     };
 
+    var restoreDefaultUrl = function(appDir, newUrl) {
+        fs.readFile(appDir + "/config.xml", function (read_err, read_data) {
+
+            if (read_err) {
+                errorHandler(read_err);
+                return;
+            }
+
+            var toWrite = read_data.toString().replace(newUrl, self.defaultUrl);
+            fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
+                if (write_err) {
+                    errorHandler(write_err);
+                    return;
+                }
+            });
+
+        });
+    };
+
+    var errorHandlerWithRestore = function(err, appDir, newUrl) {
+        errorHandler(err);
+        restoreDefaultUrl(appDir, newUrl);
+    };
+
     this.start = function(url) {
         self.log.debug("Starting at " + url);
 
@@ -68,7 +92,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                 fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
 
                     if (write_err) {
-                        errorHandler(write_err);
+                        errorHandlerWithRestore(write_err, appDir, newUrl);
                         return;
                     }
 
@@ -83,25 +107,8 @@ var CordovaApp = function(id, emitter, args, logger, config) {
 
                     // restore config.xml after app startup is ready
                     Promise.all(promises).then(function() {
-
-                        fs.readFile(appDir + "/config.xml", function (read_err, read_data) {
-
-                            if (read_err) {
-                                errorHandler(read_err);
-                                return;
-                            }
-
-                            var toWrite = read_data.toString().replace(newUrl, self.defaultUrl);
-                            fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
-                                if (write_err) {
-                                    errorHandler(write_err);
-                                    return;
-                                }
-                            });
-
-                        });
-
-                    }, errorHandler);
+                        restoreDefaultUrl(appDir, newUrl);
+                    }, errorHandlerWithRestore.bind(self, appDir, newUrl));
 
                 });
             });
