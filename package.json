@@ -15,9 +15,8 @@
   ],
   "author": "ergovia-mobile",
   "dependencies": {
-    "q": "~0.9.6",
-    "ncp": "^0.5.1",
-    "child-process-promise": "^0.2.0-SNAPSHOT.1389671754086"
+    "child-process-promise": "^0.2.0-SNAPSHOT.1389671754086",
+    "es6-promise": "^2.1.1"
   },
   "devDependencies": {},
   "peerDependencies": {
