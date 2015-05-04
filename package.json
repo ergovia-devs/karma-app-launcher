@@ -1,0 +1,26 @@
+{
+  "name": "karma-app-launcher",
+  "version": "0.0.1",
+  "description": "A Karma plugin. Launch on Apache Cordova App.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ergovia-mobile/karma-app-launcher.git"
+  },
+  "keywords": [
+    "karma-plugin",
+    "karma-launcher",
+    "cordova"
+  ],
+  "author": "ergovia-mobile",
+  "dependencies": {
+    "q": "~0.9.6",
+    "ncp": "^0.5.1",
+    "child-process-promise": "^0.2.0-SNAPSHOT.1389671754086"
+  },
+  "devDependencies": {},
+  "peerDependencies": {
+    "karma": ">=0.12.16"
+  }
+}
