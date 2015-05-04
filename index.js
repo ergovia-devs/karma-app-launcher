@@ -62,6 +62,9 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                 var newUrl = url + "?id=" + id;
                 var toWrite = read_data.toString().replace(/self.defaultUrl/g, newUrl);
 
+                console.log("neue config:");
+                console.log(toWrite);
+
                 fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
 
                     if (write_err) {
