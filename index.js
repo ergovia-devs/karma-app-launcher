@@ -77,7 +77,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
         self.log.debug("Starting at " + url);
 
         var appDir = self.settings.dir;
-        var host = self.settings.ip;
+        var host = self.ip;
         var platform = self.settings.platform;
 
 
@@ -103,7 +103,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                 }
 
                 // restore config.xml after app startup is ready
-                runCordovaCmd(['run', platform], appDir).then(function() {
+                runCordovaCmd(['run', platform, '--device'], appDir).then(function() {
                     restoreDefaultUrl(appDir, newUrl);
                 }, errorHandlerWithRestore.bind(appDir, newUrl));
 
