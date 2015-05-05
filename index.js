@@ -1,6 +1,7 @@
 var fs = require('fs');
 var spawn = require('child-process-promise').spawn;
-var Promise = require('es6-promise').Promise;
+var ip = require("ip");
+
 var BIN = 'cordova';
 var DEFAULTURL = 'index.html';
 
@@ -33,6 +34,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
     self.log = logger.create('launcher.cordova');
     self.name = self.platform + " on Cordova";
     self.defaultUrl = self.settings.defaultUrl ? self.settings.defaultUrl : DEFAULTURL;
+    self.ip = self.settings.host ? self.settings.host : ip.address();
 
     console.log(self.settings);
 
@@ -71,50 +73,43 @@ var CordovaApp = function(id, emitter, args, logger, config) {
     };
 
     this.start = function(url) {
+
         self.log.debug("Starting at " + url);
 
-        var appDirs = self.settings.appDirs;
-        var host = self.settings.host;
+        var appDir = self.settings.dir;
+        var host = self.settings.ip;
+        var platform = self.settings.platform;
 
-        appDirs.forEach(function(appDir) {
 
-            fs.readFile(appDir + "/config.xml", function (read_err, read_data) {
-                if (read_err) {
-                    errorHandler(read_err);
+        fs.readFile(appDir + "/config.xml", function (read_err, read_data) {
+
+            if (read_err) {
+                errorHandler(read_err);
+                return;
+            }
+
+            var newUrl = url + "?id=" + id;
+            newUrl = newUrl.replace('localhost', host);
+            var toWrite = read_data.toString().replace(self.defaultUrl, newUrl);
+
+            console.log("neue config:");
+            console.log(toWrite);
+
+            fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
+
+                if (write_err) {
+                    errorHandlerWithRestore(write_err, appDir, newUrl);
                     return;
                 }
 
-                var newUrl = url + "?id=" + id;
-                newUrl = newUrl.replace('localhost', host);
-                var toWrite = read_data.toString().replace(self.defaultUrl, newUrl);
+                // restore config.xml after app startup is ready
+                runCordovaCmd(['run', platform], appDir).then(function() {
+                    restoreDefaultUrl(appDir, newUrl);
+                }, errorHandlerWithRestore.bind(appDir, newUrl));
 
-                console.log("neue config:");
-                console.log(toWrite);
-
-                fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
-
-                    if (write_err) {
-                        errorHandlerWithRestore(write_err, appDir, newUrl);
-                        return;
-                    }
-
-                    var platforms = self.settings.platforms;
-                    var promises = [];
-
-                    platforms.forEach(function(platform) {
-                        promises.push(new Promise(function(resolve, reject) {
-                            runCordovaCmd(['run', platform], appDir).then(resolve).fail(reject);
-                        }));
-                    });
-
-                    // restore config.xml after app startup is ready
-                    Promise.all(promises).then(function() {
-                        restoreDefaultUrl(appDir, newUrl);
-                    }, errorHandlerWithRestore.bind(self, appDir, newUrl));
-
-                });
             });
         });
+
 
     };
 
