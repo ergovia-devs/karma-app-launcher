@@ -16,10 +16,10 @@
   "author": "ergovia-mobile",
   "dependencies": {
     "child-process-promise": "^0.2.0-SNAPSHOT.1389671754086",
-    "node-ip": "^0.1.2"
+    "ip": "^0.3.2"
   },
   "devDependencies": {},
   "peerDependencies": {
-    "karma": ">=0.12.16"
+    "karma": "0.10.9"
   }
 }
