@@ -62,7 +62,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
         emitter.emit('browser_process_failure', self);
     };
 
-    var restoreDefaultUrl = function(appDir, newUrl, done) {
+    var restoreDefaultUrl = function(appDir, newUrl, defaultUrl, done) {
 
         console.log('restoreDefaultUrl');
         console.log('appDir: '+appDir);
