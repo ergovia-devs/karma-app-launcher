@@ -49,6 +49,11 @@ var CordovaApp = function(id, emitter, args, logger, config) {
     };
 
     var restoreDefaultUrl = function(appDir, newUrl) {
+
+        console.log('restoreDefaultUrl');
+        console.log('appDir: '+appDir);
+        console.log('newUrl: '+newUrl);
+
         fs.readFile(appDir + "/config.xml", function (read_err, read_data) {
 
             if (read_err) {
@@ -57,6 +62,10 @@ var CordovaApp = function(id, emitter, args, logger, config) {
             }
 
             var toWrite = read_data.toString().replace(newUrl, self.defaultUrl);
+
+            console.log("neue alte config:");
+            console.log(toWrite);
+
             fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
                 if (write_err) {
                     errorHandler(write_err);
@@ -68,6 +77,11 @@ var CordovaApp = function(id, emitter, args, logger, config) {
     };
 
     var errorHandlerWithRestore = function(err, appDir, newUrl) {
+
+        console.log('errorHandlerWithRestore');
+        console.log('appDir: '+appDir);
+        console.log('newUrl: '+newUrl);
+
         errorHandler(err);
         restoreDefaultUrl(appDir, newUrl);
     };
