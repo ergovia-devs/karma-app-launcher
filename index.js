@@ -47,6 +47,8 @@ var CordovaApp = function(id, emitter, args, logger, config) {
     emitter.on('exit', function(done){
         console.log("!!!EXITING!!!");
 
+        console.log('newUrl: '+newUrl);
+
         if(newUrl) {
             restoreDefaultUrl(appDir, newUrl, defaultUrl, done);
         } else {
