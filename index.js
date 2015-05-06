@@ -31,12 +31,12 @@ function runCordovaCmd(args, appDir) {
 var CordovaApp = function(id, emitter, args, logger, config) {
 
     var self = this;
-    var appDir, defaultUrl, ip, platform, newUrl;
+    var appDir, defaultUrl, host, platform, newUrl;
     self.settings = config.cordovaAppSettings;
 
     appDir = self.settings.dir;
     defaultUrl = self.settings.defaultUrl ? self.settings.defaultUrl : DEFAULTURL;
-    ip = self.settings.host ? self.settings.host : ip.address();
+    host = self.settings.host ? self.settings.host : ip.address();
     platform = self.settings.platform;
 
     self.log = logger.create('launcher.cordova');
@@ -113,7 +113,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
             }
 
             newUrl = url + "?id=" + id;
-            newUrl = newUrl.replace('localhost', ip);
+            newUrl = newUrl.replace('localhost', host);
 
             toWrite = read_data.toString().replace(defaultUrl, newUrl);
 
