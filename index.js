@@ -29,18 +29,30 @@ function runCordovaCmd(args, appDir) {
 }
 
 var CordovaApp = function(id, emitter, args, logger, config) {
+
     var self = this;
+    var appDir, defaultUrl, ip, platform, newUrl;
     self.settings = config.cordovaAppSettings;
+
+    appDir = self.settings.dir;
+    defaultUrl = self.settings.defaultUrl ? self.settings.defaultUrl : DEFAULTURL;
+    ip = self.settings.host ? self.settings.host : ip.address();
+    platform = self.settings.platform;
+
     self.log = logger.create('launcher.cordova');
     self.name = self.platform + " on Cordova";
-    self.defaultUrl = self.settings.defaultUrl ? self.settings.defaultUrl : DEFAULTURL;
-    self.ip = self.settings.host ? self.settings.host : ip.address();
 
     console.log(self.settings);
 
     emitter.on('exit', function(done){
         console.log("!!!EXITING!!!");
-        done();
+
+        if(newUrl) {
+            restoreDefaultUrl(appDir, newUrl, defaultUrl, done);
+        } else {
+            done();
+        }
+
     });
 
     var errorHandler = function(err) {
@@ -48,7 +60,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
         emitter.emit('browser_process_failure', self);
     };
 
-    var restoreDefaultUrl = function(appDir, newUrl) {
+    var restoreDefaultUrl = function(appDir, newUrl, done) {
 
         console.log('restoreDefaultUrl');
         console.log('appDir: '+appDir);
@@ -61,7 +73,7 @@ var CordovaApp = function(id, emitter, args, logger, config) {
                 return;
             }
 
-            var toWrite = read_data.toString().replace(newUrl, self.defaultUrl);
+            var toWrite = read_data.toString().replace(newUrl, defaultUrl);
 
             console.log("neue alte config:");
             console.log(toWrite);
@@ -69,42 +81,39 @@ var CordovaApp = function(id, emitter, args, logger, config) {
             fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
                 if (write_err) {
                     errorHandler(write_err);
+
+                    if(done) {
+                        done();
+                    }
+
                     return;
+                }
+
+                if(done) {
+                    done();
                 }
             });
 
         });
     };
 
-    var errorHandlerWithRestore = function(err, appDir, newUrl) {
-
-        console.log('errorHandlerWithRestore');
-        console.log('appDir: '+appDir);
-        console.log('newUrl: '+newUrl);
-
-        errorHandler(err);
-        restoreDefaultUrl(appDir, newUrl);
-    };
-
     this.start = function(url) {
 
         self.log.debug("Starting at " + url);
 
-        var appDir = self.settings.dir;
-        var host = self.ip;
-        var platform = self.settings.platform;
-
-
         fs.readFile(appDir + "/config.xml", function (read_err, read_data) {
+
+            var toWrite;
 
             if (read_err) {
                 errorHandler(read_err);
                 return;
             }
 
-            var newUrl = url + "?id=" + id;
-            newUrl = newUrl.replace('localhost', host);
-            var toWrite = read_data.toString().replace(self.defaultUrl, newUrl);
+            newUrl = url + "?id=" + id;
+            newUrl = newUrl.replace('localhost', ip);
+
+            toWrite = read_data.toString().replace(defaultUrl, newUrl);
 
             console.log("neue config:");
             console.log(toWrite);
@@ -112,18 +121,15 @@ var CordovaApp = function(id, emitter, args, logger, config) {
             fs.writeFile(appDir + "/config.xml", toWrite, function (write_err) {
 
                 if (write_err) {
-                    errorHandlerWithRestore(write_err, appDir, newUrl);
+                    errorHandler(write_err);
                     return;
                 }
 
                 // restore config.xml after app startup is ready
-                runCordovaCmd(['run', platform, '--device'], appDir).then(function() {
-                    restoreDefaultUrl(appDir, newUrl);
-                }, errorHandlerWithRestore.bind(appDir, newUrl));
+                runCordovaCmd(['run', platform, '--device'], appDir).fail(errorHandler);
 
             });
         });
-
 
     };
 
